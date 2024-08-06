@@ -1,19 +1,13 @@
 document.getElementById("startScraping").addEventListener("click", function () {
-  const searchQuery = document.getElementById("searchQuery").value;
-
-  if (!searchQuery) {
-    alert("Please enter a search query.");
-    return;
-  }
-
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs.length > 0) {
       chrome.runtime.sendMessage(
         { action: "checkLinkedInPage" },
         (response) => {
           if (response && response.isLinkedInPage) {
+            const currentUrl = tabs[0].url;
             chrome.runtime.sendMessage(
-              { action: "startScraping", searchQuery: searchQuery },
+              { action: "startScraping", url: currentUrl },
               (response) => {
                 if (response && response.error) {
                   alert(response.error);
@@ -42,9 +36,7 @@ function displayResults(data) {
   if (Array.isArray(data) && data.length > 0) {
     data.forEach((item, index) => {
       const resultDiv = document.createElement("div");
-      resultDiv.innerHTML = `<p>${index + 1}. ${item.name} - ${item.title} - ${
-        item.location
-      }</p>`;
+      resultDiv.innerHTML = `<p>${index + 1}. ${item}</p>`;
       resultsDiv.appendChild(resultDiv);
     });
   } else {

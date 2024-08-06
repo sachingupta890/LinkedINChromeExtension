@@ -10,18 +10,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Indicates that the response is sent asynchronously
   } else if (message.action === "startScraping") {
-    if (message.searchQuery) {
+    if (message.url) {
       fetch("http://localhost:3000/scrape", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ searchQuery: message.searchQuery }),
+        body: JSON.stringify({ url: message.url }),
       })
         .then((response) => response.json())
         .then((data) => {
           chrome.storage.local.set({ scrapedData: data }, () => {
-            sendResponse({ success: true });
+            sendResponse({ success: true, data: data });
           });
         })
         .catch((error) => {
@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           sendResponse({ error: "Failed to start scraping" });
         });
     } else {
-      sendResponse({ error: "Search query missing in startScraping message." });
+      sendResponse({ error: "URL missing in startScraping message." });
     }
     return true; // Indicates that the response is sent asynchronously
   }
